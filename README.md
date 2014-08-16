@@ -1,7 +1,7 @@
 bedrock-windows
 ===============
 
-A script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site, using bedrock-ansible and Vagrant. It's aimed at someone who has none of the pre-requisites already installed.
+A script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site, using [bedrock-ansible](https://github.com/roots/bedrock-ansible) and [Vagrant](http://www.vagrantup.com/). It's aimed at someone who has none of the pre-requisites already installed.
 
 about
 =====
@@ -10,6 +10,7 @@ This PowerShell script makes use of http://chocolatey.org to provision your Wind
 It is designed to be idempotent so you can run it as many times as you want.
 
 Why did I create it?
+--------------------
 Whenever I have to set up a new open-source framework/tool (particularly on Windows), it invariably involves piecing together instructions from readme's on github and/or peoples' blogs. I feel that this type of thing should live in a script! This is so:
 * it can be reused - only a few people need to go through the pain
 * it can be versioned
