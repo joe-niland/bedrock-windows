@@ -13,3 +13,4 @@ sitemap.xml.gz
 wp-config.php
 *.sublime-project
 *.sublime-workspace
+*~
