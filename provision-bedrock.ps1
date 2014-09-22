@@ -3,12 +3,22 @@
  #>
 $DebugPreference = "SilentlyContinue" # Change to "Continue" in Dev
 
+function Download-File {
+   param (
+     [string]$url,
+       [string]$file
+        )
+     Write-Host "Downloading $url to $file"
+       $downloader = new-object System.Net.WebClient
+         $downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
+           $downloader.DownloadFile($url, $file)
+}
+
 Write-Host Run this from your dev root directory, e.g. c:\users\me\documents\dev\
 Write-Host Then pass in the project directory as a param.
 
 # Args
-# 0: path to command, e.g. d:\scripts\copymess.vbs
-# 1: Description of task
+# 0: installation directory
 
 $installDir = $Args[0]
 
@@ -43,13 +53,19 @@ if ($choice -ne "y") {
   exit
 }
 
+# Detect OS
+$Win7 = [Environment]::OSVersion.Version -eq (new-object 'Version' 6,1)
+$Win8 = [Environment]::OSVersion.Version -eq (new-object 'Version' 6,2)
+$Win81 = [Environment]::OSVersion.Version -eq (new-object 'Version' 6,3)
+
 # Create location for bedrock project
 if (!(Test-Path -Path $installDir)) {
    New-Item -Type Directory -Path $installDir | Out-Null
 }
 
 ## host machine
-# Install chocolatey <-- http://chocolatey.org/
+# Install chocolatey <-- https://chocolatey.org/
+# todo: better way to detect chocolatey
 if (!(Test-Path -Path "$Env:systemdrive\programdata\chocolatey\bin")) {
    Write-Host "Installing Chocolatey"
 
@@ -88,22 +104,40 @@ if ($vagrantPackages) {
    cinst vagrant
 }
 
-# Add Hyper-V snapins to WindowsIdentity
-$hyperV = clist -lo | where { $_ -match "^RemoteServerAdministrationTools\-Roles\-HyperV" }
+# Add Hyper-V snapins
+if ($Win7) {
+  $hyperV = clist -lo | where { $_ -match "^RemoteServerAdministrationTools\-Roles\-HyperV" }
 
-if ($hyperV) {
-   Write-Host "Hyper-V Tools are already installed: $hyperV"
-} else {
-   Write-Host "Installing Hyper-V Tools"
-   cinst -source windowsfeatures RemoteServerAdministrationTools RemoteServerAdministrationTools-Roles  RemoteServerAdministrationTools-Roles-HyperV
+  if ($hyperV) {
+     Write-Host "Hyper-V Tools are already installed: $hyperV"
+  } else {
+     Write-Host "Installing Hyper-V Tools"
+     cinst -source windowsfeatures RemoteServerAdministrationTools RemoteServerAdministrationTools-Roles  RemoteServerAdministrationTools-Roles-HyperV
+  }
+}
+
+if ($Win8) {
+  $hyperV = clist -lo | where { $_ -match "^Microsoft\-Hyper\-V\-Management\-PowerShell" }
+
+  if ($hyperV) {
+     Write-Host "Hyper-V Tools are already installed: $hyperV"
+  } else {
+     Write-Host "Installing Hyper-V Tools"
+     cinst -source windowsfeatures Microsoft-Hyper-V-Management-PowerShell
+  }
 }
 
 
 # Download bedrock-ansible and bedrock
 if (!(Test-Path "bedrock-ansible")) {
-   Write-Host "Cloning bedrock-ansible"
-	git clone https://github.com/roots/bedrock-ansible.git
-	Write-Host "edit bedrock-ansible\Vagrantfile and set path to wordpress location"
+  Write-Host "Cloning bedrock-ansible"
+  git clone https://github.com/roots/bedrock-ansible.git
+
+  # Get the Windows modifications
+  Download-File https://gist.githubusercontent.com/starise/e90d981b5f9e1e39f632/raw/da32555e909fda646c1c4abc46d6d2ae658dd080/Vagrantfile bedrock-ansible/Vagrantfile
+  Download-File https://gist.githubusercontent.com/starise/e90d981b5f9e1e39f632/raw/8b3bc9a18adfdc1eea62b0a29b0c875cee86118a/windows.sh bedrock-ansible/windows.sh
+
+  Write-Host "edit bedrock-ansible\Vagrantfile and set path to wordpress location"
 	Write-Host "edit bedrock-ansible\group_vars\all and set site-specific options"
 }
 
@@ -112,19 +146,9 @@ if (!(Test-Path "$installDir")) {
 	git clone https://github.com/roots/bedrock.git $installDir 
 }
 
-### Vagrant setup
+
+### Vagrant plugin setup
 $vagrantUpdateRun = $false
-$vagrantSalt = vagrant plugin list | where { $_ -match "^vagrant\-salt" }
-
-if ($vagrantSalt) {
-   Write-Host "vagrant-salt plugin is already installed: $vagrantSalt - checking for updates"
-   vagrant plugin update
-   $vagrantUpdateRun = $true
-} else {
-   Write-Host "Installing vagrant-salt plugin"
-   vagrant plugin install vagrant-salt
-}
-
 $vagrantHostsUpdater = vagrant plugin list | where { $_ -match "^vagrant\-hostsupdater" }
 
 if ($vagrantHostsUpdater) {
@@ -132,6 +156,7 @@ if ($vagrantHostsUpdater) {
    if (!$vagrantUpdateRun) {
       Write-Host "checking for vagrant plugin updates"
       vagrant plugin update
+      $vagrantUpdateRun = $true
    }
 } else {
    Write-Host "Installing vagrant-hostsupdater plugin"
