@@ -38,8 +38,9 @@ usage
     or, even better: `cd c:\dev\wp themes\ && mklink provision-bedrock.ps1 path\to\cloned\repo\provision-bedrock.ps1`.
 
 3. Open a PowerShell console and type: `.\provision-bedrock.ps1 project_name`, where project_name is the name of your theme.
-4. The script will ask you to continue, type `y` if you would like to continue.
-5. Once the script has completed, you will need to edit the following files to match your environment:
+4. The script will ask if you want to set a custom apt mirror. This can make it faster to update packages in the VM. Enter `n` if you don't want to .
+5. The script will ask you to continue, type `y` if you would like to continue.
+6. Once the script has completed, you may want to edit the following files to your preference:
    1. _your_dev_root\project_name\bedrock-ansible\Vagrantfile_
    2. _your_dev_root\project_name\bedrock-ansible\group_vars\development_
 
