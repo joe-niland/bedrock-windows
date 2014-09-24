@@ -16,8 +16,8 @@ Having a working git executable in your PATH is a requirement. If you don't have
 Dependencies
 --------------
 The script installs [Chocolatey](http://chocolatey.org) and uses it to install the Windows versions of the required prerequisites:
-    + vagrant
-    + virtualbox
+* vagrant
+* virtualbox
     
 It then pulls git projects from [bedrock](https://github.com/roots/bedrock)and [bedrock-ansible](https://github.com/roots/bedrock-ansible). It also splices in a [gist](https://gist.github.com/starise/e90d981b5f9e1e39f632) from [Andrea Brandi](https://github.com/starise).
 
