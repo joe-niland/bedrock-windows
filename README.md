@@ -46,6 +46,7 @@ usage
 
    See https://github.com/roots/bedrock-ansible#usage for details.
 6. Then, navigate to _your_dev_root\project_name\bedrock-ansible_ and type `vagrant up`
+7. Open your browser and go to 'project_name.dev/' to view your freshly created Bedrock site!
 
 contributions
 =============
