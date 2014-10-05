@@ -1,7 +1,7 @@
 bedrock-windows
 ===============
 
-A script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site, using [bedrock-ansible](https://github.com/roots/bedrock-ansible) and [Vagrant](http://www.vagrantup.com/). It's aimed at someone who has none of the pre-requisites already installed, but can be used by anyone on Windows.
+A script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site on Windows, using [bedrock-ansible](https://github.com/roots/bedrock-ansible) and [Vagrant](http://www.vagrantup.com/). It's aimed at someone who has none of the pre-requisites already installed, but can be used by anyone on Windows.
 
 about
 =====
