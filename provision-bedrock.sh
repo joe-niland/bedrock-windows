@@ -1,4 +1,4 @@
- # Create a fresh Wordpress bedrock VM using bedrock-ansible and vagrant. 
+# Create a fresh Wordpress bedrock VM using bedrock-ansible and vagrant. 
 echo Run this from your dev root directory, e.g. c:\users\me\documents\dev\
 echo Then pass in the project directory as a param.
 
