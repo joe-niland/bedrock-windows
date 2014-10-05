@@ -37,7 +37,7 @@ function Update-VagrantPlugin {
 
     if ($pluginFound) {
        Write-Host "vagrant-$pluginName plugin is already installed: $pluginFound"
-       if (!$updatePlugins) {
+       if ($updatePlugins) {
           Write-Host "checking for vagrant plugin updates"
           vagrant plugin update
        }
