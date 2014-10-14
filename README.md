@@ -35,7 +35,17 @@ usage
 1. git clone https://github.com/joe-niland/bedrock-windows.git
 2. Copy provision-bedrock.ps1 to your wordpress development root, e.g. c:\dev\wp themes\
 
-    or, even better: `cd c:\dev\wp themes\ && mklink provision-bedrock.ps1 path\to\cloned\repo\provision-bedrock.ps1`.
+    or, even better: 
+
+    ```
+    cd "c:\dev\wp themes\" && mklink provision-bedrock.ps1 path\to\cloned\repo\provision-bedrock.ps1
+    ```
+
+    or in powershell:
+
+    ```
+    cd "c:\dev\wp themes\"; cmd /c mklink provision-bedrock.ps1 path\to\cloned\repo\provision-bedrock.ps1
+    ```
 
 3. Open a PowerShell console and type: `.\provision-bedrock.ps1 project_name`, where project_name is the name of your theme.
 4. The script will ask if you want to set a custom apt mirror. This can make it faster to update packages in the VM. Enter `n` if you want to use the default 'archive.ubuntu.com'.
