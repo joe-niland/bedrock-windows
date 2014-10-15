@@ -273,7 +273,7 @@ if (!(Test-Path "bedrock-ansible")) {
 
   $vagrantSetAptMirror = ""
   if ($aptMirror -ne "") {
-    Write-Host "Adding custom apt mirror"
+    Write-Host "Adding custom apt mirror: $aptMirror"
     $vagrantSetAptMirror = "config.vm.provision ""shell"", inline: ""sudo sed -i.backup 's/archive.ubuntu.com/$aptMirror/g;s/security.ubuntu.com/$aptMirror/g' /etc/apt/sources.list"""
     (gc $vagrantFilepath -raw) | % { $_ -replace '(?s)(?<provider>config.vm.provider.+?end)', ('${provider}' + "`n`n$vagrantSetAptMirror") } | sc $vagrantFilepath
   }
