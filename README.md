@@ -51,8 +51,8 @@ The instructions below assume the following:
 
     Remember that Ansible's top level playbook (`site.yml`) file defines your whole infrastructure, so you can define multiple sites and/or hosts.
 
-steps to generate your VM
---------------------------
+steps to generate your VM and project base
+------------------------------------------
 
 1. git clone https://github.com/joe-niland/bedrock-windows.git
 2. Copy provision-bedrock.ps1 to your wordpress development root, e.g. c:\dev\wp themes\
@@ -80,7 +80,7 @@ steps to generate your VM
 7. Then, navigate to _your_dev_root\project_name\bedrock-ansible_ and type `vagrant up`
 8. Open your browser and go to 'project_name.dev/' to view your freshly created Bedrock site!
 
-generating your Nth projects
+generating your Nth project
 -----------------------------
 
 As mentioned above there's no need to maintain multiple bedrock-ansible instances (and therefore multiple VMs) unless you really need to seperate them.

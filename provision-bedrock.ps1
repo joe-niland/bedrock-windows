@@ -1,10 +1,10 @@
 <#
  # Create a fresh Wordpress bedrock VM using bedrock-ansible and vagrant. 
  #>
-$DebugPreference = "Continue" # Change to "Continue" in Dev
+$DebugPreference = "SilentlyContinue" # Change to "Continue" in Dev; "SilentlyContinue" in Production
 
 Set-Variable -Name aptMirror -Value ""
-Set-Variable -Name vagrantConfigIncludeSitesFile -Value "site_config = YAML::load_file(`"../.sites/sites.yml`")"
+Set-Variable -Name vagrantConfigIncludeSitesFile -Value "   site_config = YAML::load_file(`"../.sites/sites.yml`")"
 Set-Variable -Name vagrantConfigSyncedFolders -Value @"
   site_config['sites'].each do |site_name|
     config.vm.synced_folder '../' + site_name, '/srv/www/' + site_name + '/current',
