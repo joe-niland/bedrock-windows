@@ -1,7 +1,7 @@
 bedrock-windows
 ===============
 
-A script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site on Windows, using [bedrock-ansible](https://github.com/roots/bedrock-ansible) and [Vagrant](http://www.vagrantup.com/). It's aimed at someone who has none of the pre-requisites already installed, but can be used by anyone on Windows.
+A PowerShell script to automate creation of a new [bedrock](https://github.com/roots/bedrock)-based Wordpress site on Windows, using [bedrock-ansible](https://github.com/roots/bedrock-ansible) and [Vagrant](http://www.vagrantup.com/). It's aimed at someone who has none of the pre-requisites already installed, but can be used by anyone on Windows.
 
 about
 =====
@@ -13,7 +13,12 @@ It is designed to be idempotent so you can run it as many times as you want.
 
 requirements
 ------------
-Having a working git executable in your PATH is a requirement. If you don't have this, I recommend downloading [GitHub for Windows](https://windows.github.com/), and opening the "Git Shell" shortcut that it installs.
+
+  + a working git executable in your PATH
+
+  If you don't have this, I recommend downloading [GitHub for Windows](https://windows.github.com/), and opening the "Git Shell" shortcut that it installs.
+
+  I didn't include a git command line installation in this script because I didn't want to the script to be opinionated about which git client to use.
 
 dependencies
 --------------
@@ -21,7 +26,7 @@ The script installs [Chocolatey](http://chocolatey.org) and uses it to install t
 * vagrant
 * virtualbox
 
-It also uses the PowerShell module manager to import a required module:
+It also uses the PowerShell module manager to import a required module (PowerYAML):
 * [PsGet](http://psget.net/)
     
 It then pulls git projects from:
@@ -32,10 +37,13 @@ It then pulls git projects from:
 
 why did I create this?
 --------------------
-Whenever I have to set up a new open-source framework/tool (particularly on Windows), it invariably involves piecing together instructions from readme's/gists on github and/or peoples' blogs. I feel that this type of thing should live in a script! This is so:
+Whenever I have to set up a new open-source framework/tool (particularly on Windows), it invariably involves piecing together instructions from readme's/gists on github and/or peoples' blogs. I feel that this type of thing should live in a script! 
+
+This is so:
 * it can be reused - only a few people need to go through the pain
 * it can be versioned; and improvements tracked
 * in some cases, it can be rolled into the target project
+* if the script is well organised, it can serve in place of documentation, which noone tends to want to write.
 
 BTW, if you're more of a yeoman type of Sir, head over to: https://github.com/paramburu/generator-bedrock
 
@@ -93,6 +101,6 @@ Sure! Right now I'd love people to test this on Windows to make sure we've irone
 
 todo
 ====
+1. Implement as PowerShell module
 1. Reload path env var
 2. Handle non-standard Chocolatey install.
-3. Implement as a [BoxStarter](http://boxstarter.org/) package.
