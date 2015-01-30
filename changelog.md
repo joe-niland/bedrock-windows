@@ -8,6 +8,7 @@ Version 0.3
 + Bug fix: Default option when choosing to specify a custom apt mirror was not read correctly (thanks rtpHarry)
 + More reliable way to detect if Chocolatey already installed
 + Script clean up
++ Added check for git client in path
 
 Version 0.2 (f0457c3)
 ------------

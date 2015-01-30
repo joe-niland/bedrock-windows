@@ -3,10 +3,12 @@
  #
  # Version: 0.3
  #>
-$DebugPreference = "SilentlyContinue" # Change to "Continue" in Dev; "SilentlyContinue" in Production
+$DebugPreference = "Continue" # Change to "Continue" in Dev; "SilentlyContinue" in Production
 
 Set-Variable -Name chocolateyPath -Value "$env:AllUsersProfile\chocolatey" -Option Constant
 Set-Variable -Name chocolateyBinPath -Value "$chocolateyPath\bin" -Option Constant
+
+Set-Variable -Name LOCAL_DNS_SUFFIX -Value "dev" -Option Constant
 
 Set-Variable -Name vagrantConfigIncludeSitesFile -Value "   site_config = YAML::load_file(`"../.sites/sites.yml`")"
 Set-Variable -Name vagrantConfigSyncedFolders -Value @"
@@ -19,7 +21,7 @@ Set-Variable -Name vagrantConfigSyncedFolders -Value @"
   end
 "@
 
-Set-Variable -Name ansibleWpSite -Value @"
+Set-Variable -Name ansibleWpSiteYaml -Value @"
   - site_name: example.dev
     site_hosts:
       - example.dev
@@ -260,7 +262,7 @@ function Install-BedrockAnsible {
 function Create-SitesFile {
    <#
         .DESCRIPTION
-        Creates sites yaml file to index all our WordPress sites.
+        Adds entry for our project to the sites index file. Creates sites yaml file and .sites\ directory if they do not already exist.
         
         .PARAMETER installDir
         Site local directory path.
@@ -285,7 +287,7 @@ function Create-SitesFile {
 
   $sitesFile = (Resolve-Path $sitesFile)
 
-  import-module PsGet
+  # import-module PsGet
   import-module PowerYaml
   $sites = Get-Yaml -FromFile "$sitesFile"
 
@@ -305,27 +307,24 @@ function Create-GroupVarsEntry {
         .DESCRIPTION
         Adds WordPress site to Ansible group_vars/development yaml file.
         
-        .PARAMETER installDir
-        Site local directory path.
-
         .PARAMETER hostName
-        VM host name.
+        Site local DNS name.
 
         .PARAMETER ansibleRoot
         Path to the Bedrock Ansible project directory.
 
   #>
-  param ( [string]$installDir, [string]$hostName, [string]$ansibleRoot )
-
-  # Generate site-specific values
-  $site_dns = "$installDir.$hostName"
-  $site_name = $site_dns.replace('.', '_')
+  param ( [string]$hostName, [string]$ansibleRoot )
 
   $groupVarsDevPath = ($ansibleRoot + "\group_vars\development")
+  Write-Debug "Group vars dev path: $groupVarsDevPath"
 
-  Write-Host "Group vars dev path: $groupVarsDevPath"
+  # Generate site-specific values
+  $site_dns = "$hostName"
+  $site_name = $site_dns.replace('.', '_')
+  Write-Debug "Site DNS: $site_dns; Site Name: $site_name"
 
-  import-module PsGet
+  # import-module PsGet
   import-module PowerYaml
   $group_vars = Get-Yaml -FromFile "$groupVarsDevPath"
 
@@ -333,18 +332,34 @@ function Create-GroupVarsEntry {
 
   if ($site -eq $null) {
 
-    Write-Host "Adding Wordpress site config to bedrock-ansible\group_vars\development"
+    Write-Host "Adding WordPress site config for $hostname to bedrock-ansible\group_vars\development"
+
+    $newSiteYamlString = $ansibleWpSiteYaml
 
     $rand = New-Object System.Random
     # Generate a new 8 character password for MySQL
     1..8 | ForEach { $dbPassword = $dbPassword + [char]$rand.next(33, 127) }
 
     # Replace values
-    (gc $groupVarsDevPath).replace("example.dev", $site_dns) | sc $groupVarsDevPath
-    (gc $groupVarsDevPath).replace("example_dev", $site_name) | sc $groupVarsDevPath
-    (gc $groupVarsDevPath).replace("Example Site", $installDir) | sc $groupVarsDevPath
-    (gc $groupVarsDevPath).replace("example_dbuser", "u_$site_name") | sc $groupVarsDevPath # todo: check length here
-    (gc $groupVarsDevPath).replace("example_dbpassword", $dbPassword) | sc $groupVarsDevPath
+    $newSiteYamlString = $newSiteYamlString.replace("example.dev", $site_dns)
+    # (gc $groupVarsDevPath).replace("example.dev", $site_dns) | sc $groupVarsDevPath
+    $newSiteYamlString = $newSiteYamlString.replace("example_dev", $site_name)
+    # (gc $groupVarsDevPath).replace("example_dev", $site_name) | sc $groupVarsDevPath
+    $newSiteYamlString = $newSiteYamlString.replace("Example Site", $hostname)
+    # (gc $groupVarsDevPath).replace("Example Site", $hostname) | sc $groupVarsDevPath
+    $newSiteYamlString = $newSiteYamlString.replace("example_dbuser", "u_$hostname")
+    # (gc $groupVarsDevPath).replace("example_dbuser", "u_$hostname") | sc $groupVarsDevPath # todo: check length here
+    $newSiteYamlString = $newSiteYamlString.replace("example_dbpassword", "$dbPassword")
+    # (gc $groupVarsDevPath).replace("example_dbpassword", $dbPassword) | sc $groupVarsDevPath
+
+    $newSiteYaml = New-Object System.Collections.Hashtable
+    $newSiteYaml += Get-Yaml -FromString $newSiteYamlString
+
+    $group_vars.wordpress_sites += $newSiteYaml
+
+    $group_vars | Export-Yaml $groupVarsDevPath $false
+  } else {
+    Write-Host "Ansible site config already exists for $site_dns"
   }
 }
 
@@ -373,7 +388,7 @@ if (!(Get-Command "git" -ErrorAction SilentlyContinue))
 }
 
 # Set VM hostname
-$hostName = "$projectDir.dev"
+$hostName = "$projectDir.$LOCAL_DNS_SUFFIX"
 
 $installDir = Join-Path (Get-Location) $projectDir
 Write-Host Installing to $installDir
@@ -420,14 +435,14 @@ if (!(Test-Path "$installDir")) {
   git clone https://github.com/roots/bedrock.git $installDir
 
   Create-SitesFile $installDir
-  Write-Host "$installDir $hostname $bedrockAnsiblePath"
-  Create-GroupVarsEntry $installDir $hostname $bedrockAnsiblePath
+  Create-GroupVarsEntry $hostname $bedrockAnsiblePath
 }
 
 ### Vagrant plugin setup
 Update-VagrantPlugin "hostsupdater" $true
 Update-VagrantPlugin "cachier" $false
 
+Write-Host "`n`n+++ Done +++"
 Write-Host "`n`nWordpress configuration details can be found in bedrock-ansible\group_vars\development`n"
 Write-Host "You may want to edit this file to specify Site Title, Email, db connection properties, etc"
 Write-Host "You may also like to make further updates to the Vagrantfile, or ansible yml files.`n`nOnce complete, 'cd bedrock-ansible && vagrant up' or 'cd bedrock-ansible; vagrant up' from powershell"
